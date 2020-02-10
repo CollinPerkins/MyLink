@@ -72,8 +72,6 @@ namespace MyLink
                 };
             });
 
-            // configure DI for application services
-            services.AddScoped<IUserService, UserService>();
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
