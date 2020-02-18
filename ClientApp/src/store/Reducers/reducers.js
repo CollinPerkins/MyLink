@@ -1,17 +1,15 @@
-import * as Home from './HomeReducer';
 import * as AuthenticationReducer from './AuthenticationReducer';
 import * as UsersReducer from './UsersReducer';
 import * as AlertReducer from './AlertReducer';
-import * as Counter from '../Counter';
-import * as WeatherForecasts from '../WeatherForecasts';
+import * as CounterReducer from './CounterReducer';
+import * as WeatherForecastsReducer from './WeatherReducer';
 
 const reducers = {
-    home: Home.reducer,
-    counter: Counter.reducer,
+    counter: CounterReducer.reducer,
     alert: AlertReducer.reducer,
     authentication: AuthenticationReducer.reducer,
     users: UsersReducer.reducer,
-    weatherForecasts: WeatherForecasts.reducer
+    weatherForecasts: WeatherForecastsReducer.reducer
 };
 
 export default reducers;

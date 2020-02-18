@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using MyLink.Services;
 using MyLink.Models;
 using Microsoft.AspNetCore.Identity;
 using MyLink.Data;
@@ -15,7 +14,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace WebApi.Controllers
 {
-    [Authorize, ApiController, Route("api/[controller]")]
+    [Authorize]
+    [Route("api/[controller]")]
+    [ApiController]
     public class UsersController : ControllerBase
     {
         private UserManager<User> _userManager { get; set; }
@@ -29,36 +30,51 @@ namespace WebApi.Controllers
             _configuration = configuration;
         }
 
-
-        [AllowAnonymous, HttpPost]
-        public async Task<IActionResult> Register([FromBody]UserLoginViewModel model) {
-            var user = await _userManager.FindByNameAsync(model.Username);
-            if (user == null)
+        [AllowAnonymous] 
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register(UserLoginViewModel model) {
+            try
             {
-                user = new User { UserName = model.Username };
-                var result = await _userManager.CreateAsync(user, model.Password);
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    user = new User {
+                        UserName = model.Email,
+                        Email = model.Email,
+                        FirstName = model.FirstName,
+                        LastName = model.LastName,
+                        PhoneNumber = model.PhoneNumber
+                    };
+
+                    var result = await _userManager.CreateAsync(user, model.Password);
 
 
-                if (result.Succeeded)
-                    return Ok(new { Message = "created succefully"});
+                    if (result.Succeeded)
+                        return Ok(new { Message = "created succefully" });
+                    else
+                        return BadRequest(new { Message = "user not created" });
+                }
                 else
-                    return BadRequest(new { Message = "username not created" });
+                    return BadRequest(new { Message = "user already taken" });
             }
-            else
-                return BadRequest(new { Message = "username already taken"});
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex });
+            }
         }
 
 
-        [AllowAnonymous, HttpPost]
-        public async Task<IActionResult> Authenticate([FromBody]UserLoginViewModel model)
+        [AllowAnonymous]
+        [HttpPost("Authenticate")]
+        public async Task<IActionResult> Authenticate(UserLoginViewModel model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Username);
+            var user = await _userManager.FindByEmailAsync(model.Email);
             if(user == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
+                return BadRequest(new { message = "Email or password is incorrect" });
 
             var result = _userManager.CheckPasswordAsync(user, model.Password);
-            if (result == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
+            if (result.Result == false)
+                return BadRequest(new { message = "Email or password is incorrect" });
 
 
 
@@ -104,8 +120,11 @@ namespace WebApi.Controllers
         }
 
         public class UserLoginViewModel {
-            public string Username { get; set; }
             public string Password { get; set; }
+            public string Email { get; set; }
+            public string PhoneNumber { get; set; }
+            public string LastName { get; set; }
+            public string FirstName { get; set; }
         }
     }
 }

@@ -23,7 +23,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20200211210026_UpdatedUserModel.cs" />
+    <Compile Remove="Migrations\20200211210026_UpdatedUserModel.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="ClientApp\src\Views\SignupSignin\RegistrationPage.test.js">
+      <DependentUpon>RegistrationPage.js</DependentUpon>
+    </None>
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

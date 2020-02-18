@@ -1,56 +1,134 @@
-﻿import { userConstants } from '../../constants/UserConstants';
-import { userService } from '../../services/UserService';
-import { alertActions } from './AlertActions';
+﻿import { userConstants } from '../constants/UserConstants';
+import * as alertActions from './AlertActions';
 import { history } from '../../helpers/history';
+import { authHeader, ROOT_API_URL } from '../../helpers/auth-header';
 
 export const userActions = {
+    register,
     login,
     logout,
     getAll
 };
 
-function login(username, password) {
+function register( password, email, phoneNumber, firstName, lastName) {
     return dispatch => {
-        dispatch(request({ username }));
+        dispatch({
+            type: userConstants.LOGIN_REQUEST,
+            email
+        });
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password, email, phoneNumber, firstName, lastName })
+        };
 
-        userService.login(username, password)
+        fetch(`${ROOT_API_URL}/Users/Register`, requestOptions)
+            .then(handleResponse)
             .then(
                 user => {
-                    dispatch(success(user));
-                    history.push('/home');
+                    dispatch({
+                        type: userConstants.LOGIN_SUCCESS,
+                        email
+                    });
+                    history.push('/login');
                 },
                 error => {
-                    dispatch(failure(error));
+                    dispatch({
+                        type: userConstants.LOGIN_FAILURE,
+                        error
+                    });
                     dispatch(alertActions.error(error));
                 }
             );
     };
+}
 
-    function request(user) { return { type: userConstants.LOGIN_REQUEST, user } }
-    function success(user) { return { type: userConstants.LOGIN_SUCCESS, user } }
-    function failure(error) { return { type: userConstants.LOGIN_FAILURE, error } }
+function login(email, password) {
+    return dispatch => {
+        dispatch({
+            type: userConstants.LOGIN_REQUEST,
+            email
+        });
+
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        };
+
+        fetch(`${ROOT_API_URL}/users/Authenticate`, requestOptions)
+            .then(handleResponse)
+            .then(
+                user => {
+                    // store user details and jwt token in local storage to keep user logged in between page refreshes
+                    localStorage.setItem('user', JSON.stringify(user));
+                    dispatch({
+                        type: userConstants.LOGIN_SUCCESS,
+                        email
+                    });
+                    history.push('/home');
+                },
+                error => {
+                    dispatch({
+                        type: userConstants.LOGIN_FAILURE,
+                        error
+                    });
+                    dispatch(alertActions.error(error));
+                }
+            );
+    };
 }
 
 function logout() {
-    userService.logout();
+    localStorage.removeItem('user');
     return { type: userConstants.LOGOUT };
 }
 
+
+
 function getAll() {
     return dispatch => {
-        dispatch(request());
+        dispatch({
+            type: userConstants.GETALL_REQUEST
+        });
+        const requestOptions = {
+            method: 'GET',
+            headers: authHeader()
+        };
 
-        userService.getAll()
+
+        fetch(`${ROOT_API_URL}/users`, requestOptions)
+            .then(handleResponse)
             .then(
-                users => dispatch(success(users)),
+                users => dispatch({
+                    type: userConstants.GETALL_SUCCESS,
+                    users
+                }),
                 error => {
-                    dispatch(failure(error));
+                    dispatch({
+                        type: userConstants.GETALL_FAILURE,
+                        error
+                    });
                     dispatch(alertActions.error(error))
                 }
             );
     };
+}
 
-    function request() { return { type: userConstants.GETALL_REQUEST } }
-    function success(users) { return { type: userConstants.GETALL_SUCCESS, users } }
-    function failure(error) { return { type: userConstants.GETALL_FAILURE, error } }
+function handleResponse(response) {
+    return response.text().then(text => {
+        const data = text && JSON.parse(text);
+        if (!response.ok) {
+            if (response.status === 401) {
+                // auto logout if 401 response returned from api
+                localStorage.removeItem('user');
+                window.location.reload(true);
+            }
+
+            const error = (data && data.message) || response.statusText;
+            return Promise.reject(error);
+        }
+
+        return data;
+    });
 }

@@ -1,21 +1,44 @@
 import React from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { actionCreators } from '../store/Counter';
+import * as counterActions  from '../store/Actions/CounterActions';
+import { bindActionCreators } from 'redux'
 
-const Counter = props => (
-  <div>
-    <h1>Counter</h1>
+class Counter extends React.Component {
+    constructor(props) {
+        super(props);
 
-    <p>This is a simple example of a React component.</p>
+        this.state = {
+        };
+    }
 
-    <p>Current count: <strong>{props.count}</strong></p>
+    render() {
+        return (
+            <div>
+                <h1>Counter</h1>
 
-    <button className="btn btn-primary" onClick={props.increment}>Increment</button>
-  </div>
-);
+                <p>This is a simple example of a React component.</p>
 
-export default connect(
-  state => state.counter,
-  dispatch => bindActionCreators(actionCreators, dispatch)
-)(Counter);
+                <p>Current count: <strong>{this.props.counter.count}</strong></p>
+
+                <button className="btn btn-primary" onClick={this.props.increment}>Increment</button>
+
+                <button className="btn btn-primary" onClick={this.props.decrement}>Decrement</button>
+            </div>
+        );
+    }
+}
+
+function mapStateToProps(state) {
+    return {
+        counter: state.counter
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        dispatch,
+        ...bindActionCreators({ ...counterActions }, dispatch)
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Counter);

@@ -1,0 +1,11 @@
+/* 
+    1 - ALERT BOX STYLING 
+*/
+/* 1 - ALERT BOX STYLING */
+.ALERT_SUCCESS {
+  background-color: green;
+  color: white; }
+
+.ALERT_ERROR {
+  background-color: red;
+  color: white; }

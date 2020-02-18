@@ -8,10 +8,13 @@ import { Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import { history } from './helpers/history';
-import { alertActions } from './store/Actions/AlertActions';
+import * as alertActions from './store/Actions/AlertActions';
 import { PrivateRoute } from './components/PrivateRoute';
 import HomePage from './Views/HomePage/HomePage';
-import LoginPage from './Views/LoginPage/LoginPage';
+import LoginPage from './Views/SignupSignin/LoginPage';
+import RegistrationPage from './Views/SignupSignin/RegistrationPage';
+import "./App.css";
+
 
 class App extends React.Component {
     constructor(props) {
@@ -26,7 +29,7 @@ class App extends React.Component {
 
     render() {
         return (
-            <div className="">
+            <div>
                 {this.props.alert.message &&
                     <div className={`alert ${this.props.alert.type}`}>{this.props.alert.message}</div>
                 }
@@ -37,6 +40,7 @@ class App extends React.Component {
                             <PrivateRoute path="/home" component={HomePage} />
                             <PrivateRoute path='/fetch-data/:startDateIndex?' component={FetchData} />
                             <Route path="/login" component={LoginPage} />
+                            <Route path="/register" component={RegistrationPage} />
                             <Route exact path="/" component={Home} />
                             <Route path='/counter' component={Counter} />
                         </div>
